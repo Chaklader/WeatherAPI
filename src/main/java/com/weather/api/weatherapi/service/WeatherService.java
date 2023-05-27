@@ -2,6 +2,7 @@ package com.weather.api.weatherapi.service;
 
 
 import com.weather.api.weatherapi.controller.dto.*;
+import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.utils.WeatherDataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

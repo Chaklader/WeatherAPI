@@ -1,6 +1,8 @@
 package com.weather.api.weatherapi.utils;
 
 import com.weather.api.weatherapi.controller.dto.*;
+import com.weather.api.weatherapi.dao.model.Geography;
+import com.weather.api.weatherapi.dao.model.WeatherData;
 import org.json.JSONObject;
 
 
@@ -13,19 +15,23 @@ public class WeatherDataUtils {
         JSONObject main = jsonResponse.getJSONObject("main");
         JSONObject coord = jsonResponse.getJSONObject("coord");
 
-        return WeatherData.builder()
-            .visibility(jsonResponse.getInt("visibility"))
-            .temp(main.getDouble("temp"))
-            .minTemperature(main.getDouble("temp_min"))
-            .humidity(main.getInt("humidity"))
-            .pressure(main.getInt("pressure"))
-            .feelsLike(main.getDouble("feels_like"))
-            .maxTemperature(main.getDouble("temp_max"))
+        Geography geography = Geography.builder()
             .country(jsonResponse.getJSONObject("sys").getString("country"))
-            .name(jsonResponse.getString("name"))
+            .city(jsonResponse.getString("name"))
             .latitude(coord.getDouble("lat"))
             .longitude(coord.getDouble("lon"))
+            .build();
+
+        return WeatherData.builder()
+            .visibility(jsonResponse.getInt("visibility"))
+            .currentTemperature(main.getDouble("temp"))
+            .minTemperature(main.getDouble("temp_min"))
+            .maxTemperature(main.getDouble("temp_max"))
+            .feelsLike(main.getDouble("feels_like"))
+            .humidity(main.getInt("humidity"))
+            .pressure(main.getInt("pressure"))
             .windSpeed(jsonResponse.getJSONObject("wind").getDouble("speed"))
+            .geography(geography)
             .build();
     }
 
@@ -33,7 +39,7 @@ public class WeatherDataUtils {
 
         return SimplifiedWeatherData.builder()
             .visibility(weatherData.getVisibility())
-            .temperature(kelvinToCelsius(weatherData.getTemp()))
+            .temperature(kelvinToCelsius(weatherData.getCurrentTemperature()))
             .humidity(weatherData.getHumidity())
             .pressure(weatherData.getPressure())
             .feelsLike(kelvinToCelsius(weatherData.getFeelsLike()))
