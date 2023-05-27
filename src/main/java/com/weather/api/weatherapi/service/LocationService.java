@@ -24,6 +24,9 @@ public class LocationService {
     @Value("${geolite2.city.database.location}")
     private String dbLocation;
 
+    @Value("${weatherdata.grid.size}")
+    private Double gridSize;
+
 
     public Coordinate retrieveCoordinateFromIpAddress() throws IOException, GeoIp2Exception {
 
@@ -35,8 +38,12 @@ public class LocationService {
         CityResponse response = dbReader.city(ipAddress);
 
         return Coordinate.builder()
-            .latitude(response.getLocation().getLatitude())
-            .longitude(response.getLocation().getLongitude())
+            .latitude(roundToGrid(response.getLocation().getLatitude()))
+            .longitude(roundToGrid(response.getLocation().getLongitude()))
             .build();
+    }
+
+    private double roundToGrid(double coordinate) {
+        return Math.round(coordinate / gridSize) * gridSize;
     }
 }

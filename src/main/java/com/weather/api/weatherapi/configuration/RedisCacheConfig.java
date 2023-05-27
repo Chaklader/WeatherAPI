@@ -25,10 +25,6 @@ public class RedisCacheConfig {
     @Value("${weatherdata.cache.duration}")
     private Integer weatherDataCacheDuration;
 
-    @Value("${weatherdata.grid.size}")
-    private Double gridSize;
-
-
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -62,9 +58,7 @@ public class RedisCacheConfig {
             for (Object param : params) {
                 if (param instanceof Coordinate) {
                     Coordinate coordinate = (Coordinate) param;
-                    double roundedLatitude = roundToGrid(coordinate.getLatitude());
-                    double roundedLongitude = roundToGrid(coordinate.getLongitude());
-                    keyBuilder.append(roundedLatitude).append(":").append(roundedLongitude);
+                    keyBuilder.append(coordinate.getLatitude()).append(":").append(coordinate.getLongitude());
                 } else {
                     keyBuilder.append(param.toString());
                 }
@@ -72,10 +66,6 @@ public class RedisCacheConfig {
 
             return keyBuilder.toString();
         };
-    }
-
-    private double roundToGrid(double coordinate) {
-        return Math.round(coordinate / gridSize) * gridSize;
     }
 
 }
