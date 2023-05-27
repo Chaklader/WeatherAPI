@@ -1,4 +1,4 @@
-package com.weather.api.weatherapi.service;
+package com.weather.api.weatherapi.controller.dto;
 
 
 import lombok.Builder;

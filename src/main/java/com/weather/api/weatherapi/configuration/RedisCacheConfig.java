@@ -1,6 +1,7 @@
 package com.weather.api.weatherapi.configuration;
 
-import com.weather.api.weatherapi.service.Coordinate;
+import com.weather.api.weatherapi.controller.dto.Coordinate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -20,6 +21,15 @@ import java.time.Duration;
 @EnableCaching
 public class RedisCacheConfig {
 
+
+    @Value("${weatherdata.cache.duration}")
+    private Integer weatherDataCacheDuration;
+
+    @Value("${weatherdata.grid.size}")
+    private Double gridSize;
+
+
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -29,11 +39,10 @@ public class RedisCacheConfig {
         return template;
     }
 
-    // TODO: give the cache duration from the properties file
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10))
+                .entryTtl(Duration.ofMinutes(weatherDataCacheDuration))
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
@@ -49,16 +58,24 @@ public class RedisCacheConfig {
             StringBuilder keyBuilder = new StringBuilder();
             keyBuilder.append(target.getClass().getSimpleName()).append(":");
             keyBuilder.append(method.getName()).append(":");
+
             for (Object param : params) {
                 if (param instanceof Coordinate) {
                     Coordinate coordinate = (Coordinate) param;
-                    keyBuilder.append(coordinate.getLatitude()).append(":").append(coordinate.getLongitude());
+                    double roundedLatitude = roundToGrid(coordinate.getLatitude());
+                    double roundedLongitude = roundToGrid(coordinate.getLongitude());
+                    keyBuilder.append(roundedLatitude).append(":").append(roundedLongitude);
                 } else {
                     keyBuilder.append(param.toString());
                 }
             }
+
             return keyBuilder.toString();
         };
+    }
+
+    private double roundToGrid(double coordinate) {
+        return Math.round(coordinate / gridSize) * gridSize;
     }
 
 }

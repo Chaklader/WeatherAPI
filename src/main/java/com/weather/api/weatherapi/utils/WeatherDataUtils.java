@@ -14,7 +14,6 @@ public class WeatherDataUtils {
         final JSONArray weather = jsonResponse.getJSONArray("weather");
         final JSONObject wind = jsonResponse.getJSONObject("wind");
 
-
         return WeatherData.builder()
             .temperature(main.getDouble("temp"))
             .tempMin(main.getDouble("temp_min"))
@@ -56,30 +55,20 @@ public class WeatherDataUtils {
             .build();
     }
 
-    // TODO: need to round the temp data and provide the units
-    /*
-    {
-        "visibility": 3500,
-        "temperature": 31.03000000000003,
-        "humidity": 58,
-        "pressure": 1008,
-        "feelsLike": 307.57,
-        "windSpeed": 2.57
-    }
-    * */
     public static SimplifiedWeatherData convertToSimplifiedWeatherData(WeatherData weatherData) {
         return SimplifiedWeatherData.builder()
             .visibility(weatherData.getVisibility())
             .temperature(kelvinToCelsius(weatherData.getTemperature()))
             .humidity(weatherData.getHumidity())
             .pressure(weatherData.getPressure())
-            .feelsLike(weatherData.getFeelsLike())
+            .feelsLike(kelvinToCelsius(weatherData.getFeelsLike()))
             .windSpeed(weatherData.getWind().getSpeed())
             .build();
     }
 
     private static double kelvinToCelsius(double temperatureInKelvin) {
-        return temperatureInKelvin - 273.15;
+        double temperatureInCelsius = temperatureInKelvin - 273.15;
+        return Math.round(temperatureInCelsius * 100.0) / 100.0;
     }
 
 }

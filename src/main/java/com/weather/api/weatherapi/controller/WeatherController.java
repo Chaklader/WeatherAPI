@@ -29,7 +29,6 @@ public class WeatherController {
     /*
         2. Implemented web service should be resilient to 3rd party service unavailability
         3. Data from 3rd party providers should be stored in a database and use database versioning
-        4. An in-memory cache should be used as the first layer in data retrieval
     * */
 
     @GetMapping("/weather")
