@@ -1,4 +1,4 @@
-package com.weather.api.weatherapi;
+package com.weather.api.weatherapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

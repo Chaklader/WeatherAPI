@@ -26,3 +26,18 @@ of the items (more is better, however).
    6. DB schema versioning should be implemented
       Result submission
       Please provide a link to a Git repository containing your implementation.
+
+
+#To clone a project that uses Git LFS and includes large files, follow these steps:
+
+1. Clone the repository:
+2. Run the following command to install Git LFS using Homebrew (a popular package manager for macOS):
+   $ brew install git-lfs
+3. Initialize Git LFS in the cloned repository:
+   $ git lfs install
+
+4. Fetch the Git LFS objects:
+   $ git lfs fetch
+
+5. Run the following command to checkout the files with Git LFS:
+   $ git lfs checkout

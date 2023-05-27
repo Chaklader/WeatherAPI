@@ -1,4 +1,4 @@
-package com.weather.api.weatherapi;
+package com.weather.api.weatherapi.controller.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -26,41 +26,12 @@ public class WeatherData {
     private Wind wind;
 }
 
-@Data
-@Builder
-class Clouds {
-    private int all;
-}
 
-@Data
-@Builder
-class Sys {
-    private String country;
-    private long sunrise;
-    private long sunset;
-    private int id;
-    private int type;
-}
 
-@Data
-@Builder
-class Coord {
-    private double lon;
-    private double lat;
-}
 
-@Data
-@Builder
-class Weather {
-    private String icon;
-    private String description;
-    private String main;
-    private int id;
-}
 
-@Data
-@Builder
-class Wind {
-    private int deg;
-    private double speed;
-}
+
+
+
+
+
