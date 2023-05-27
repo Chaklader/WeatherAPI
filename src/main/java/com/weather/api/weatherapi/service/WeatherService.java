@@ -3,6 +3,7 @@ package com.weather.api.weatherapi.service;
 
 import com.weather.api.weatherapi.controller.dto.*;
 import com.weather.api.weatherapi.dao.model.WeatherData;
+import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.utils.WeatherDataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +32,9 @@ public class WeatherService {
     private String OPEN_WEATHER_MAP_API_BASE_URL;
 
 
+    private final WeatherRepository weatherRepository;
+
+
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(Coordinate coordinate) {
 
@@ -47,6 +51,8 @@ public class WeatherService {
                 JSONObject jsonResponse = new JSONObject(responseJson);
 
                 WeatherData weatherData = WeatherDataUtils.getWeatherData(jsonResponse);
+//                weatherRepository.save(weatherData);
+
                 return WeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
 
             } else {
