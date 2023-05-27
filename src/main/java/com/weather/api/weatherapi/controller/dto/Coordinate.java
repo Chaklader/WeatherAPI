@@ -13,6 +13,5 @@ import lombok.Getter;
 public class Coordinate {
 
     private final Double latitude;
-
     private final Double longitude;
 }

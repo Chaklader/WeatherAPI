@@ -27,6 +27,7 @@ public class WeatherController {
     private final LocationService locationService;
 
     /*
+        1. Create base Exception handler and handle the exceptions accordingly
         2. Implemented web service should be resilient to 3rd party service unavailability
         3. Data from 3rd party providers should be stored in a database and use database versioning
     * */

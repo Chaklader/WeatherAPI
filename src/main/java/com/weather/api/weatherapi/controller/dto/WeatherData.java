@@ -6,24 +6,19 @@ import lombok.Data;
 @Data
 @Builder
 public class WeatherData {
-    private double temperature;
-    private double tempMin;
+
+    private int visibility;
+    private double temp;
+    private double minTemperature;
     private int humidity;
     private int pressure;
     private double feelsLike;
-    private double tempMax;
-    private int visibility;
-    private int timezone;
-    private Clouds clouds;
-    private Sys sys;
-    private long dt;
-    private Coord coord;
-    private Weather[] weather;
+    private double maxTemperature;
+    private String country;
     private String name;
-    private int cod;
-    private int id;
-    private String base;
-    private Wind wind;
+    private double latitude;
+    private double longitude;
+    private double windSpeed;
 }
 
 
