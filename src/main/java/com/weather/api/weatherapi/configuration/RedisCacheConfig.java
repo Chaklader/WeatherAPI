@@ -56,7 +56,9 @@ public class RedisCacheConfig {
             keyBuilder.append(method.getName()).append(":");
 
             for (Object param : params) {
-                if (param instanceof Coordinate) {
+                if (param instanceof String) {
+                    keyBuilder.append(param.toString()).append(":");
+                } else if (param instanceof Coordinate) {
                     Coordinate coordinate = (Coordinate) param;
                     keyBuilder.append(coordinate.getLatitude()).append(":").append(coordinate.getLongitude());
                 } else {
@@ -67,5 +69,6 @@ public class RedisCacheConfig {
             return keyBuilder.toString();
         };
     }
+
 
 }

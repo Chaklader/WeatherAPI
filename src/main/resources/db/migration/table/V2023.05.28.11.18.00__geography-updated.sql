@@ -1,0 +1,1 @@
+ALTER TABLE geography ADD ip_address VARCHAR(125);

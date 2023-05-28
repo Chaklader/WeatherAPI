@@ -38,7 +38,7 @@ public class WeatherService {
 
 
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
-    public SimplifiedWeatherData getWeatherDataByCoordinate(Coordinate coordinate) {
+    public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
 
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
 
@@ -53,6 +53,7 @@ public class WeatherService {
                 JSONObject jsonResponse = new JSONObject(responseJson);
 
                 Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
+                geography.setIpAddress(ipAddress);
 
                 weatherRepository.save(geography.getWeatherData());
                 geographyRepository.save(geography);

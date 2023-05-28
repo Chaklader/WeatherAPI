@@ -19,6 +19,8 @@ public class Geography extends AbstractEntity {
     private double latitude;
     private double longitude;
 
+    private String ipAddress;
+
     @OneToOne
     private WeatherData weatherData;
 
