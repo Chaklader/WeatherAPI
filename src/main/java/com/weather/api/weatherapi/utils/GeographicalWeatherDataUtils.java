@@ -5,6 +5,7 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import org.json.JSONObject;
 
+import java.util.Date;
 
 
 public class GeographicalWeatherDataUtils {
@@ -24,6 +25,7 @@ public class GeographicalWeatherDataUtils {
             .humidity(main.getInt("humidity"))
             .pressure(main.getInt("pressure"))
             .windSpeed(jsonResponse.getJSONObject("wind").getDouble("speed"))
+            .queryTimestamp(new Date())
             .build();
 
         return Geography.builder()
@@ -32,6 +34,7 @@ public class GeographicalWeatherDataUtils {
             .latitude(coord.getDouble("lat"))
             .longitude(coord.getDouble("lon"))
             .weatherData(weatherData)
+            .queryTimestamp(new Date())
             .build();
     }
 

@@ -33,6 +33,7 @@ public class WeatherController {
         2. provide good logging in the entire app
         3. Write unit and integration tests for the app (coverage: 80%)
         4. Add the postman collection with the project
+        5. Provide the docker and docker-compose file
     * */
     @GetMapping("/weather")
     public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception {
@@ -45,7 +46,7 @@ public class WeatherController {
 
 
     // TODO: why use @RequestParam in one controller and @PathVariable in another?
-    @GetMapping("/history/weather/coordinates")
+    @GetMapping("/weather/coordinates")
     public ResponseEntity<List<WeatherDataDto>> getHistoricalWeatherByCoordinates(@RequestParam double latitude, @RequestParam double longitude) {
 
         List<WeatherDataDto> weatherDataList = weatherService.getHistoricalWeatherByCoordinates(latitude, longitude);

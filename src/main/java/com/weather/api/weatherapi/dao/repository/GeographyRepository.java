@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface GeographyRepository extends JpaRepository<Geography, String> {
 
-    Optional<Geography> findByIpAddressOrLatitudeAndLongitude(String ipAddress, double latitude, double longitude);
+    Optional<Geography> findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(String ipAddress, double latitude, double longitude);
 
     List<Geography> findAllByIpAddress(String ipAddress);
 }

@@ -4,6 +4,7 @@ import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.weather.api.weatherapi.controller.dto.Coordinate;
+import com.weather.api.weatherapi.utils.GridBasedLocationUtils;
 import com.weather.api.weatherapi.utils.IpAddressFinder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,13 +22,10 @@ import java.net.InetAddress;
 @Service
 public class LocationService {
 
+    private final GridBasedLocationUtils gridBasedLocationUtils;
 
     @Value("${geolite2.city.database.location}")
     private String dbLocation;
-
-    @Value("${weatherdata.grid.size}")
-    private Double gridSize;
-
 
     public Pair<String, Coordinate> retrieveCoordinateFromIpAddress() throws IOException, GeoIp2Exception {
 
@@ -41,12 +39,9 @@ public class LocationService {
         CityResponse response = dbReader.city(ipAddress);
 
         return Pair.of(hostAddress, Coordinate.builder()
-            .latitude(roundToGrid(response.getLocation().getLatitude()))
-            .longitude(roundToGrid(response.getLocation().getLongitude()))
+            .latitude(gridBasedLocationUtils.roundToGrid(response.getLocation().getLatitude()))
+            .longitude(gridBasedLocationUtils.roundToGrid(response.getLocation().getLongitude()))
             .build());
     }
 
-    private double roundToGrid(double coordinate) {
-        return Math.round(coordinate / gridSize) * gridSize;
-    }
 }

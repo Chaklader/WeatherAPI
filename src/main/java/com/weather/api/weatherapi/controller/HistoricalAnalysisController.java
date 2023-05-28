@@ -32,6 +32,7 @@ public class HistoricalAnalysisController {
 
     @GetMapping("/queries/ip/{ipAddress}")
     public ResponseEntity<List<GeographyDto>> getHistoricalQueriesByIp(@PathVariable String ipAddress) {
+
         List<GeographyDto> queries = geographyService.getHistoricalQueriesByIp(ipAddress);
         return ResponseEntity.ok(queries);
     }
