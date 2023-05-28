@@ -2,10 +2,10 @@ package com.weather.api.weatherapi.service;
 
 
 import com.weather.api.weatherapi.controller.dto.*;
-import com.weather.api.weatherapi.dao.model.WeatherData;
+import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
-import com.weather.api.weatherapi.utils.WeatherDataUtils;
+import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
@@ -40,11 +40,11 @@ public class WeatherService {
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(Coordinate coordinate) {
 
-        String url = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
+        String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-            .url(url)
+            .url(OPEN_WEATHER_MAP_QUERY_URL)
             .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -52,12 +52,12 @@ public class WeatherService {
                 String responseJson = Objects.requireNonNull(response.body()).string();
                 JSONObject jsonResponse = new JSONObject(responseJson);
 
-                WeatherData weatherData = WeatherDataUtils.getWeatherData(jsonResponse);
+                Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
 
-                geographyRepository.save(weatherData.getGeography());
-                weatherRepository.save(weatherData);
+                weatherRepository.save(geography.getWeatherData());
+                geographyRepository.save(geography);
 
-                return WeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
+                return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(geography.getWeatherData());
 
             } else {
                 System.err.println("Request was not successful: " + response.code());

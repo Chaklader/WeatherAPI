@@ -19,7 +19,7 @@ public class Geography extends AbstractEntity {
     private double latitude;
     private double longitude;
 
-    @OneToOne(mappedBy = "geography")
+    @OneToOne
     private WeatherData weatherData;
 
 }

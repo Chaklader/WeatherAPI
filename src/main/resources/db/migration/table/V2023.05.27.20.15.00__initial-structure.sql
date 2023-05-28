@@ -31,3 +31,7 @@ CREATE TABLE weather_data
 );
 
 
+DROP TABLE geography CASCADE ;
+DROP TABLE weather_data CASCADE;
+
+

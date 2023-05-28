@@ -25,7 +25,7 @@ public class WeatherData extends AbstractEntity{
     private int visibility;
     private double windSpeed;
 
-    @OneToOne
+    @OneToOne(mappedBy = "weatherData")
     private Geography geography;
 }
 

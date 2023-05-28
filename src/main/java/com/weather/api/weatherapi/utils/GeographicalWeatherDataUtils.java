@@ -7,22 +7,15 @@ import org.json.JSONObject;
 
 
 
-public class WeatherDataUtils {
+public class GeographicalWeatherDataUtils {
 
 
-    public static WeatherData getWeatherData(JSONObject jsonResponse) {
+    public static Geography getWeatherData(JSONObject jsonResponse) {
 
         JSONObject main = jsonResponse.getJSONObject("main");
         JSONObject coord = jsonResponse.getJSONObject("coord");
 
-        Geography geography = Geography.builder()
-            .country(jsonResponse.getJSONObject("sys").getString("country"))
-            .city(jsonResponse.getString("name"))
-            .latitude(coord.getDouble("lat"))
-            .longitude(coord.getDouble("lon"))
-            .build();
-
-        return WeatherData.builder()
+        WeatherData weatherData = WeatherData.builder()
             .visibility(jsonResponse.getInt("visibility"))
             .currentTemperature(main.getDouble("temp"))
             .minTemperature(main.getDouble("temp_min"))
@@ -31,7 +24,14 @@ public class WeatherDataUtils {
             .humidity(main.getInt("humidity"))
             .pressure(main.getInt("pressure"))
             .windSpeed(jsonResponse.getJSONObject("wind").getDouble("speed"))
-            .geography(geography)
+            .build();
+
+        return Geography.builder()
+            .country(jsonResponse.getJSONObject("sys").getString("country"))
+            .city(jsonResponse.getString("name"))
+            .latitude(coord.getDouble("lat"))
+            .longitude(coord.getDouble("lon"))
+            .weatherData(weatherData)
             .build();
     }
 
