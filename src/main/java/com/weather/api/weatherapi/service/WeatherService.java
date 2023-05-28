@@ -6,20 +6,25 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
+import com.weather.api.weatherapi.service.client.DefaultContentTypeInterceptor;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 @Log4j2
@@ -39,49 +44,76 @@ public class WeatherService {
     private final GeographyRepository geographyRepository;
 
 
+    // TODO: check with AI that this method works as intended
+    // TODO: cache
+    // TODO: asynchorous request
+    // TODO: singleton client
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
-
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-            .url(OPEN_WEATHER_MAP_QUERY_URL)
+        int cacheSize = 10 * 1024 * 1024;
+        File cacheDirectory = new File("src/main/resources/cache");
+        Cache cache = new Cache(cacheDirectory, cacheSize);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+            .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
+            .cache(cache)
+            .followRedirects(false)
+            .readTimeout(1, TimeUnit.SECONDS)
             .build();
 
-        try (Response response = client.newCall(request).execute()) {
+        Request request = new Request.Builder().url(OPEN_WEATHER_MAP_QUERY_URL).build();
 
-            if (response.isSuccessful()) {
+        CompletableFuture<SimplifiedWeatherData> future = new CompletableFuture<>();
 
-                String responseJson = Objects.requireNonNull(response.body()).string();
-                JSONObject jsonResponse = new JSONObject(responseJson);
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try (response) {
+                    if (response.isSuccessful()) {
+                        String responseJson = Objects.requireNonNull(response.body()).string();
+                        JSONObject jsonResponse = new JSONObject(responseJson);
 
-                Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
-                geography.setIpAddress(ipAddress);
-                WeatherData weatherData = geography.getWeatherData();
+                        Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
+                        geography.setIpAddress(ipAddress);
+                        WeatherData weatherData = geography.getWeatherData();
 
-                weatherRepository.save(weatherData);
-                geographyRepository.save(geography);
+                        weatherRepository.save(weatherData);
+                        geographyRepository.save(geography);
 
-                return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
-            } else {
-
-                Optional<Geography> geographyOptional = geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(ipAddress, coordinate.getLatitude(), coordinate.getLongitude());
-                if (geographyOptional.isPresent()) {
-
-                    Geography existingGeography = geographyOptional.get();
-                    return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(existingGeography.getWeatherData());
-                } else {
-                    System.err.println("Request was not successful: " + response.code());
-                    return null;
+                        SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
+                        future.complete(simplifiedWeatherData);
+                    } else {
+                        Optional<Geography> geographyOptional = geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(ipAddress, coordinate.getLatitude(), coordinate.getLongitude());
+                        if (geographyOptional.isPresent()) {
+                            Geography existingGeography = geographyOptional.get();
+                            SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(existingGeography.getWeatherData());
+                            future.complete(simplifiedWeatherData);
+                        } else {
+                            System.err.println("Request was not successful: " + response.code());
+                            future.complete(null);
+                        }
+                    }
+                } catch (Exception e) {
+                    future.completeExceptionally(e);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                future.completeExceptionally(e);
+            }
+        });
+
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+
 
     public List<WeatherDataDto> getHistoricalWeatherByCoordinates(double latitude, double longitude) {
 
