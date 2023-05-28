@@ -7,14 +7,18 @@ import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.service.client.DefaultContentTypeInterceptor;
+import com.weather.api.weatherapi.service.client.OkHttpClientSingleton;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -43,25 +47,33 @@ public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final GeographyRepository geographyRepository;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @PostConstruct
+    public void init() {
+        OkHttpClientSingleton.INSTANCE.initialize(applicationContext);
+    }
 
     // TODO: check with AI that this method works as intended
-    // TODO: cache
-    // TODO: asynchorous request
     // TODO: singleton client
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
 
-        int cacheSize = 10 * 1024 * 1024;
-        File cacheDirectory = new File("src/main/resources/cache");
-        Cache cache = new Cache(cacheDirectory, cacheSize);
+//        int cacheSize = 10 * 1024 * 1024;
+//        File cacheDirectory = new File("src/main/resources/cache");
+//        Cache cache = new Cache(cacheDirectory, cacheSize);
+//
+//        OkHttpClient client = new OkHttpClient.Builder()
+//            .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
+//            .cache(cache)
+//            .followRedirects(false)
+//            .readTimeout(1, TimeUnit.SECONDS)
+//            .build();
 
-        OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
-            .cache(cache)
-            .followRedirects(false)
-            .readTimeout(1, TimeUnit.SECONDS)
-            .build();
+
+        OkHttpClient client = OkHttpClientSingleton.INSTANCE.getClient();
 
         Request request = new Request.Builder().url(OPEN_WEATHER_MAP_QUERY_URL).build();
 
