@@ -3,6 +3,7 @@ package com.weather.api.weatherapi.service;
 
 import com.weather.api.weatherapi.controller.dto.*;
 import com.weather.api.weatherapi.dao.model.Geography;
+import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
@@ -16,8 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
-
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Log4j2
@@ -37,6 +40,7 @@ public class WeatherService {
     private final GeographyRepository geographyRepository;
 
 
+    // TODO: make sure we can perform historical search - at the moment if the data exists, we just update it
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
 
@@ -48,21 +52,60 @@ public class WeatherService {
             .build();
 
         try (Response response = client.newCall(request).execute()) {
+
+            Optional<Geography> geographyOptional = geographyRepository.findByIpAddressOrLatitudeAndLongitude(ipAddress, coordinate.getLatitude(), coordinate.getLongitude());
+
             if (response.isSuccessful()) {
+
                 String responseJson = Objects.requireNonNull(response.body()).string();
                 JSONObject jsonResponse = new JSONObject(responseJson);
 
                 Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
                 geography.setIpAddress(ipAddress);
+                WeatherData weatherData = geography.getWeatherData();
 
-                weatherRepository.save(geography.getWeatherData());
-                geographyRepository.save(geography);
+                if (geographyOptional.isPresent()) {
+                    Geography existingGeography = geographyOptional.get();
+                    WeatherData existingWeatherData = existingGeography.getWeatherData();
 
-                return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(geography.getWeatherData());
+                    existingWeatherData.setCurrentTemperature(weatherData.getCurrentTemperature());
+                    existingWeatherData.setMinTemperature(weatherData.getMinTemperature());
+                    existingWeatherData.setMaxTemperature(weatherData.getMaxTemperature());
+                    existingWeatherData.setFeelsLike(weatherData.getFeelsLike());
+                    existingWeatherData.setHumidity(weatherData.getHumidity());
+                    existingWeatherData.setPressure(weatherData.getPressure());
+                    existingWeatherData.setVisibility(weatherData.getVisibility());
+                    existingWeatherData.setWindSpeed(weatherData.getWindSpeed());
+
+                    weatherRepository.save(existingWeatherData);
+
+                    existingGeography.setCountry(geography.getCountry());
+                    existingGeography.setCity(geography.getCity());
+                    existingGeography.setLatitude(geography.getLatitude());
+                    existingGeography.setLongitude(geography.getLongitude());
+                    existingGeography.setIpAddress(geography.getIpAddress());
+
+                    geographyRepository.save(existingGeography);
+
+                } else {
+                    weatherRepository.save(weatherData);
+                    geographyRepository.save(geography);
+                }
+
+                return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
 
             } else {
-                System.err.println("Request was not successful: " + response.code());
-                return null;
+
+                if (geographyOptional.isPresent()) {
+
+                    Geography existingGeography = geographyOptional.get();
+                    WeatherData existingWeatherData = existingGeography.getWeatherData();
+
+                    return GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(existingWeatherData);
+                } else {
+                    System.err.println("Request was not successful: " + response.code());
+                    return null;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,5 +113,14 @@ public class WeatherService {
 
         return null;
     }
+
+    // TODO: round the coordinates before the search
+    public List<WeatherDataDto> getHistoricalWeatherByCoordinates(double latitude, double longitude) {
+
+        List<WeatherData> andGeographyLongitude = weatherRepository.findAllByGeography_LatitudeAndGeography_Longitude(latitude, longitude);
+
+        return andGeographyLongitude.stream().map(WeatherDataMapper::mapToDto).toList();
+    }
+
 
 }
