@@ -3,6 +3,7 @@ package com.weather.api.weatherapi.service;
 
 import com.weather.api.weatherapi.controller.dto.*;
 import com.weather.api.weatherapi.dao.model.WeatherData;
+import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.utils.WeatherDataUtils;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class WeatherService {
 
 
     private final WeatherRepository weatherRepository;
+    private final GeographyRepository geographyRepository;
 
 
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
@@ -51,7 +53,9 @@ public class WeatherService {
                 JSONObject jsonResponse = new JSONObject(responseJson);
 
                 WeatherData weatherData = WeatherDataUtils.getWeatherData(jsonResponse);
-//                weatherRepository.save(weatherData);
+
+                geographyRepository.save(weatherData.getGeography());
+                weatherRepository.save(weatherData);
 
                 return WeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
 
