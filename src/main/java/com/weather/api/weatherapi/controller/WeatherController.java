@@ -27,13 +27,14 @@ public class WeatherController {
 
     // TODO
     /*
-        0. DB schema should allow a historical analysis of both queries from a
+        0. TODO: DB schema should allow a historical analysis of both queries from a
            specific IP and of weather conditions for specific coordinates
         1. Create base Exception handler and handle the exceptions accordingly
         2. provide good logging in the entire app
-        3. Write unit and integration tests for the app (coverage: 80%)
+        3. TODO: Write unit and integration tests for the app (coverage: 80%)
         4. Add the postman collection with the project
         5. Provide the docker and docker-compose file
+        6. TODO: make the client singleton
     * */
     @GetMapping("/weather")
     public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception {

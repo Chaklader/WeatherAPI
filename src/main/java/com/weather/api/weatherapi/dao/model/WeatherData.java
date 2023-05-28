@@ -31,6 +31,7 @@ public class WeatherData extends AbstractEntity{
     @Column(name = "query_timestamp")
     private Date queryTimestamp;
 
+    @ToString.Exclude
     @OneToOne(mappedBy = "weatherData")
     private Geography geography;
 }

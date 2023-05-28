@@ -7,7 +7,6 @@ import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
-import com.weather.api.weatherapi.utils.GridBasedLocationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.OkHttpClient;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Log4j2
@@ -39,10 +37,8 @@ public class WeatherService {
 
     private final WeatherRepository weatherRepository;
     private final GeographyRepository geographyRepository;
-    private final GridBasedLocationUtils gridBasedLocationUtils;
 
 
-    // TODO: make the client singleton
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
 
@@ -89,10 +85,7 @@ public class WeatherService {
 
     public List<WeatherDataDto> getHistoricalWeatherByCoordinates(double latitude, double longitude) {
 
-        List<WeatherData> andGeographyLongitude = weatherRepository.findAllByGeography_LatitudeAndGeography_Longitude(
-            gridBasedLocationUtils.roundToGrid(latitude),
-            gridBasedLocationUtils.roundToGrid(longitude)
-        );
+        List<WeatherData> andGeographyLongitude = weatherRepository.findAllByGeography_LatitudeAndGeography_Longitude(latitude, longitude);
 
         return andGeographyLongitude.stream().map(WeatherDataMapper::mapToDto).toList();
     }
