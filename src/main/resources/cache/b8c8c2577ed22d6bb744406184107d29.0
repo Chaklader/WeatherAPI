@@ -1,0 +1,16 @@
+http://api.openweathermap.org/data/2.5/weather?lat=23.700000000000003&lon=90.4&appid=6a2d7bcc0ccd7c6269addc6f1af23c8b
+GET
+0
+HTTP/1.1 200 OK
+11
+Server: openresty
+Date: Sun, 28 May 2023 14:27:28 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 455
+Connection: keep-alive
+X-Cache-Key: /data/2.5/weather?lat=23.7&lon=90.4
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: GET, POST
+OkHttp-Sent-Millis: 1685284048530
+OkHttp-Received-Millis: 1685284048596
