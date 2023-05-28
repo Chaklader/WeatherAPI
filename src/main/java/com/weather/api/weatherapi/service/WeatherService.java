@@ -6,7 +6,6 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
-import com.weather.api.weatherapi.service.client.DefaultContentTypeInterceptor;
 import com.weather.api.weatherapi.service.client.OkHttpClientSingleton;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
 import jakarta.annotation.PostConstruct;
@@ -21,14 +20,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 
 @Log4j2
@@ -56,22 +53,10 @@ public class WeatherService {
     }
 
     // TODO: check with AI that this method works as intended
-    // TODO: singleton client
+    // TODO: Events in OkHTTP
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
-
-//        int cacheSize = 10 * 1024 * 1024;
-//        File cacheDirectory = new File("src/main/resources/cache");
-//        Cache cache = new Cache(cacheDirectory, cacheSize);
-//
-//        OkHttpClient client = new OkHttpClient.Builder()
-//            .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
-//            .cache(cache)
-//            .followRedirects(false)
-//            .readTimeout(1, TimeUnit.SECONDS)
-//            .build();
-
 
         OkHttpClient client = OkHttpClientSingleton.INSTANCE.getClient();
 

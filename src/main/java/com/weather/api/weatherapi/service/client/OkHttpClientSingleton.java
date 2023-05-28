@@ -28,6 +28,7 @@ public enum OkHttpClientSingleton {
         client = new OkHttpClient.Builder()
             .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
             .cache(cache)
+            .eventListener(new WeatherLogEventsListener())
             .followRedirects(false)
             .readTimeout(1, TimeUnit.SECONDS)
             .build();
