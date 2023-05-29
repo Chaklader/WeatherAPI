@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 
 @SuppressWarnings("LineLength")
@@ -28,19 +26,19 @@ public class WeatherController {
     private final LocationService locationService;
 
     /*
-        1. Create base Exception handler and handle the exceptions accordingly
-        2. provide good logging in the entire app
         3. TODO: Write unit and integration tests for the app (coverage: 80%)
         4. Add the postman collection with the project
         5. Provide the docker and docker-compose file
         7. TODO: write a proper README file
+        8. Check if there is any unused imports
     * */
     @GetMapping("/weather")
     public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception{
 
-        Pair<String, Coordinate> stringCoordinatePair = locationService.retrieveCoordinateFromIpAddress();
-        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate(stringCoordinatePair.getLeft(), stringCoordinatePair.getRight());
+        Pair<String, Coordinate> ipAddressCoordinatePair = locationService.retrieveCoordinateFromIpAddress();
+        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate(ipAddressCoordinatePair.getLeft(), ipAddressCoordinatePair.getRight());
 
+        log.info("We are successfully acquired the weather data for the IP address: "+ ipAddressCoordinatePair.getLeft());
         return ResponseEntity.ok(simplifiedWeatherData);
     }
 
@@ -48,6 +46,8 @@ public class WeatherController {
     public ResponseEntity<List<WeatherDataDto>> getHistoricalWeatherByCoordinates(@RequestParam double latitude, @RequestParam double longitude) {
 
         List<WeatherDataDto> weatherDataList = weatherService.getHistoricalWeatherByCoordinates(latitude, longitude);
+        log.info(String.format("We have acquired the historical weather data query for the latitude: %s and longitude: %s", latitude, longitude));
+
         return ResponseEntity.ok(weatherDataList);
     }
 

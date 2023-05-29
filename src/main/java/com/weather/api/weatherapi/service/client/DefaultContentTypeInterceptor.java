@@ -1,5 +1,6 @@
 package com.weather.api.weatherapi.service.client;
 
+import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -18,8 +19,9 @@ public class DefaultContentTypeInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request();
+
         Request requestWithContentType = originalRequest.newBuilder()
-            .header("Content-Type", contentType)
+            .header(Parameters.CONTENT_TYPE_HEADER, contentType)
             .build();
 
         return chain.proceed(requestWithContentType);

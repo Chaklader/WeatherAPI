@@ -2,12 +2,15 @@ package com.weather.api.weatherapi.service;
 
 
 import com.weather.api.weatherapi.controller.dto.*;
+import com.weather.api.weatherapi.controller.dto.mapper.WeatherDataMapper;
 import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.service.client.OkHttpClientSingleton;
+import com.weather.api.weatherapi.service.exception.WeatherDataRetrievalException;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
+import com.weather.api.weatherapi.utils.Parameters;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -52,7 +55,7 @@ public class WeatherService {
         OkHttpClientSingleton.INSTANCE.initialize(applicationContext);
     }
 
-    @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
+    @Cacheable(value = "weatherCache", keyGenerator = Parameters.KEY_GENERATOR)
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
 
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
@@ -64,56 +67,53 @@ public class WeatherService {
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 handleOnResponse(response, ipAddress, future, coordinate);
             }
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                handleOnFailure(e, future);
+                handleOnFailure(e, future, ipAddress, coordinate);
             }
         });
 
         try {
             return future.get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            log.error("We can't retrieve the weather data from the external API and error message: "+ e.getMessage());
             return null;
         }
     }
 
-    private void handleOnFailure(@NotNull IOException e, CompletableFuture<SimplifiedWeatherData> future) {
-        future.completeExceptionally(e);
+    private void handleOnResponse(@NotNull Response response, String ipAddress, CompletableFuture<SimplifiedWeatherData> future, Coordinate coordinate) throws IOException {
+        if (response.isSuccessful()) {
+            String responseJson = Objects.requireNonNull(response.body()).string();
+            JSONObject jsonResponse = new JSONObject(responseJson);
+
+            Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
+            geography.setIpAddress(ipAddress);
+            WeatherData weatherData = geography.getWeatherData();
+
+            weatherRepository.save(weatherData);
+            geographyRepository.save(geography);
+
+            SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
+            future.complete(simplifiedWeatherData);
+        } else {
+            checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
+            log.warn("Request to the weather API was not successful with status code: " + response.code() + " and we are retrieving data from the database");
+        }
     }
 
-    private void handleOnResponse(@NotNull Response response, String ipAddress, CompletableFuture<SimplifiedWeatherData> future, Coordinate coordinate) {
-        try (response) {
-            if (response.isSuccessful()) {
-                String responseJson = Objects.requireNonNull(response.body()).string();
-                JSONObject jsonResponse = new JSONObject(responseJson);
+    private void handleOnFailure(@NotNull IOException e, CompletableFuture<SimplifiedWeatherData> future, String ipAddress, Coordinate coordinate) {
+        checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
+        log.error("Request to the weather API was not successful with error message: " + e.getMessage() + " and we are retrieving data from the database");
+    }
 
-                Geography geography = GeographicalWeatherDataUtils.getWeatherData(jsonResponse);
-                geography.setIpAddress(ipAddress);
-                WeatherData weatherData = geography.getWeatherData();
-
-                weatherRepository.save(weatherData);
-                geographyRepository.save(geography);
-
-                SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
-                future.complete(simplifiedWeatherData);
-            } else {
-                retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
-                if(!future.isDone()){
-                    future.complete(null);
-                }
-                log.error("Request was not successful: " + response.code());
-            }
-        } catch (Exception e) {
-            retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
-            if(!future.isDone()){
-                future.completeExceptionally(e);
-            }
-            log.error("Request was not successful: " + e.getMessage());
+    private void checkIfWeatherDataCanBeRetrieveFromDatabase(String ipAddress, Coordinate coordinate, CompletableFuture<SimplifiedWeatherData> future) {
+        retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
+        if (!future.isDone()) {
+            future.completeExceptionally(new WeatherDataRetrievalException(Parameters.USER_FRIENDLY_MESSAGE, Parameters.DETAILED_TECHNICAL_DESCRIPTION));
         }
     }
 
@@ -128,7 +128,6 @@ public class WeatherService {
 
 
     public List<WeatherDataDto> getHistoricalWeatherByCoordinates(double latitude, double longitude) {
-
         List<WeatherData> andGeographyLongitude = weatherRepository.findAllByGeography_LatitudeAndGeography_Longitude(latitude, longitude);
 
         return andGeographyLongitude.stream().map(WeatherDataMapper::mapToDto).toList();

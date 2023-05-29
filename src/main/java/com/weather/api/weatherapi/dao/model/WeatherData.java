@@ -1,6 +1,5 @@
 package com.weather.api.weatherapi.dao.model;
 
-//import javax.persistence.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;

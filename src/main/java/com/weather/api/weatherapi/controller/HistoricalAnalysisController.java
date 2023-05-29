@@ -27,6 +27,7 @@ public class HistoricalAnalysisController {
     public ResponseEntity<List<GeographyDto>> getHistoricalQueriesByIp(@PathVariable String ipAddress) {
 
         List<GeographyDto> queries = geographyService.getHistoricalQueriesByIp(ipAddress);
+        log.info("We have acquired the historical geographical data query for the IP address: "+ ipAddress);
         return ResponseEntity.ok(queries);
     }
 

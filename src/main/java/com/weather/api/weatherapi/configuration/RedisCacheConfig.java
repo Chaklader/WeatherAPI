@@ -25,7 +25,6 @@ public class RedisCacheConfig {
     @Value("${weatherdata.cache.duration}")
     private Integer weatherDataCacheDuration;
 
-
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();

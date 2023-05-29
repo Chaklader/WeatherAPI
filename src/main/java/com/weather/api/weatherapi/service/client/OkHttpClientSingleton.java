@@ -1,6 +1,7 @@
 package com.weather.api.weatherapi.service.client;
 
 import com.weather.api.weatherapi.configuration.OkHttpClientConfig;
+import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import org.springframework.context.ApplicationContext;
@@ -25,8 +26,9 @@ public enum OkHttpClientSingleton {
     public void initialize(ApplicationContext applicationContext) {
         OkHttpClientConfig config = applicationContext.getBean(OkHttpClientConfig.class);
         Cache cache = new Cache(new File(config.getCacheDirectory()), config.getCacheSize());
+
         client = new OkHttpClient.Builder()
-            .addInterceptor(new DefaultContentTypeInterceptor("application/json"))
+            .addInterceptor(new DefaultContentTypeInterceptor(Parameters.CONTENT_TYPE))
             .cache(cache)
             .eventListener(new WeatherLogEventsListener())
             .followRedirects(false)

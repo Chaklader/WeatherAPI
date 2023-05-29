@@ -29,8 +29,8 @@ public class LocationService {
     private Double gridSize;
 
 
-
     public double roundToGrid(double coordinate) {
+
         return Math.round(coordinate / gridSize) * gridSize;
     }
 

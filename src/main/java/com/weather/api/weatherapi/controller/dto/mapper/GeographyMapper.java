@@ -1,5 +1,6 @@
-package com.weather.api.weatherapi.controller.dto;
+package com.weather.api.weatherapi.controller.dto.mapper;
 
+import com.weather.api.weatherapi.controller.dto.GeographyDto;
 import com.weather.api.weatherapi.dao.model.Geography;
 
 public class GeographyMapper {

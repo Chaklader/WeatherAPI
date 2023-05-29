@@ -11,10 +11,4 @@ import java.util.List;
 public interface WeatherRepository extends JpaRepository<WeatherData, String> {
 
     List<WeatherData> findAllByGeography_LatitudeAndGeography_Longitude(double latitude, double longitude);
-
-//    Optional<Commodity> findCommodityByReference(String commodityReferenceId);
-//
-//    List<Commodity> findByCommodityStatusAndPurchaseDateBefore(Commodity.CommodityStatus commodityStatus, Date purchaseDate);
-//
-//    List<Commodity> findByCommodityStatusAndSellActivityIdIsNull(Commodity.CommodityStatus commodityStatus);
 }
