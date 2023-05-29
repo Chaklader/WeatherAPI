@@ -33,7 +33,6 @@ public class WeatherController {
         3. TODO: Write unit and integration tests for the app (coverage: 80%)
         4. Add the postman collection with the project
         5. Provide the docker and docker-compose file
-        6. TODO: make the client singleton
         7. TODO: write a proper README file
     * */
     @GetMapping("/weather")

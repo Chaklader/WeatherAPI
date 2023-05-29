@@ -52,8 +52,7 @@ public class WeatherService {
         OkHttpClientSingleton.INSTANCE.initialize(applicationContext);
     }
 
-    // TODO: check with AI that this method works as intended
-    // TODO: Events in OkHTTP
+    // TODO: check that this method is written as intended
     @Cacheable(value = "weatherCache", keyGenerator = "keyGenerator")
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
         String OPEN_WEATHER_MAP_QUERY_URL = String.format(OPEN_WEATHER_MAP_API_BASE_URL, coordinate.getLatitude(), coordinate.getLongitude(), OPEN_WEATHER_MAP_API_KEY);
@@ -82,18 +81,18 @@ public class WeatherService {
                         SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
                         future.complete(simplifiedWeatherData);
                     } else {
-                        Optional<Geography> geographyOptional = geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(ipAddress, coordinate.getLatitude(), coordinate.getLongitude());
-                        if (geographyOptional.isPresent()) {
-                            Geography existingGeography = geographyOptional.get();
-                            SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(existingGeography.getWeatherData());
-                            future.complete(simplifiedWeatherData);
-                        } else {
-                            System.err.println("Request was not successful: " + response.code());
+                        retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
+                        if(!future.isDone()){
                             future.complete(null);
                         }
+                        log.error("Request was not successful: " + response.code());
                     }
                 } catch (Exception e) {
-                    future.completeExceptionally(e);
+                    retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
+                    if(!future.isDone()){
+                        future.completeExceptionally(e);
+                    }
+                    log.error("Request was not successful: " + e.getMessage());
                 }
             }
 
@@ -108,6 +107,15 @@ public class WeatherService {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void retrieveWeatherDataFromDatabase(String ipAddress, Coordinate coordinate, CompletableFuture<SimplifiedWeatherData> future) {
+        Optional<Geography> geographyOptional = geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(ipAddress, coordinate.getLatitude(), coordinate.getLongitude());
+        if (geographyOptional.isPresent()) {
+            Geography existingGeography = geographyOptional.get();
+            SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(existingGeography.getWeatherData());
+            future.complete(simplifiedWeatherData);
         }
     }
 
