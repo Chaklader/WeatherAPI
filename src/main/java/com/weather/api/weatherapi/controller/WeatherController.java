@@ -26,11 +26,10 @@ public class WeatherController {
     private final LocationService locationService;
 
     /*
-        3. TODO: Write unit and integration tests for the app (coverage: 80%)
-        4. Add the postman collection with the project
-        5. Provide the docker and docker-compose file
-        7. TODO: write a proper README file
-        8. Check if there is any unused imports
+        1. TODO: Write unit and integration tests for the app (coverage: 80%)
+        2. TODO: Add the postman collection with the project
+        3. TODO: write a proper README file - write main API description that IP address needs to be provided
+            using the headers + Open API webpage
     * */
     @GetMapping("/weather")
     public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception{
