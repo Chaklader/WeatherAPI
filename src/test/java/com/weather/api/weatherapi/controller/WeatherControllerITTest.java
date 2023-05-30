@@ -53,6 +53,9 @@ public class WeatherControllerITTest {
 
     @BeforeEach
     public void setUp() {
+        geographyRepository.deleteAll();
+        weatherRepository.deleteAll();
+
         restTemplate.getRestTemplate().setInterceptors(Collections.singletonList(new BasicAuthenticationInterceptor("test", "test")));
     }
 

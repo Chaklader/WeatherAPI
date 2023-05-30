@@ -30,8 +30,8 @@ public class LocationService {
 
 
     public double roundToGrid(double coordinate) {
-
-        return Math.round(coordinate / gridSize) * gridSize;
+        double roundedValue = Math.round(coordinate / gridSize) * gridSize;
+        return Math.round(roundedValue * 100.0) / 100.0;
     }
 
     public Pair<String, Coordinate> retrieveCoordinateFromIpAddress() throws IOException, GeoIp2Exception {
