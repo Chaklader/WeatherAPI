@@ -1,9 +1,6 @@
 package com.weather.api.weatherapi.dao.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
@@ -31,7 +28,7 @@ public class WeatherData extends AbstractEntity{
     private Date queryTimestamp;
 
     @ToString.Exclude
-    @OneToOne(mappedBy = "weatherData")
+    @OneToOne(mappedBy = "weatherData", cascade = CascadeType.ALL)
     private Geography geography;
 }
 

@@ -1,8 +1,6 @@
 package com.weather.api.weatherapi.controller.dto;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.Date;
 
@@ -10,6 +8,8 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class WeatherDataDto {
 
     private double currentTemperature;

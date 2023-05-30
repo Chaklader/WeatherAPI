@@ -8,6 +8,7 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
+import com.weather.api.weatherapi.dummy.DummyData;
 import com.weather.api.weatherapi.service.exception.WeatherDataRetrievalException;
 import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.*;
@@ -78,11 +79,11 @@ public class WeatherServiceTest {
 
         when(responseBody.string()).thenReturn(readFileAsString(MOCK_WEATHER_DATA_FILE));
 
-        WeatherData weatherData = getWeatherData();
-        Geography geography = getGeography(weatherData);
+        WeatherData weatherData = DummyData.getWeatherData();
+        Geography geography = DummyData.getGeography(weatherData);
         weatherData.setGeography(geography);
 
-        Coordinate coordinate = getCoordinate();
+        Coordinate coordinate = DummyData.getCoordinate();
 
         when(weatherRepository.save(any(WeatherData.class))).thenReturn(weatherData);
         when(geographyRepository.save(any(Geography.class))).thenReturn(geography);
@@ -107,14 +108,14 @@ public class WeatherServiceTest {
 
         when(response.isSuccessful()).thenReturn(false);
 
-        WeatherData weatherData = getWeatherData();
-        Geography geography = getGeography(weatherData);
+        WeatherData weatherData = DummyData.getWeatherData();
+        Geography geography = DummyData.getGeography(weatherData);
         weatherData.setGeography(geography);
 
         when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
             .thenReturn(Optional.of(geography));
 
-        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", DummyData.getCoordinate());
 
         assertNotNull(simplifiedWeatherData, "The simplifiedWeatherData should not be null");
         assertEquals(simplifiedWeatherData.getVisibility(), 4000);
@@ -136,7 +137,7 @@ public class WeatherServiceTest {
             .thenReturn(Optional.empty());
 
         Exception exception = assertThrows(WeatherDataRetrievalException.class, () -> {
-            weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+            weatherService.getWeatherDataByCoordinate("103.150.26.242", DummyData.getCoordinate());
         });
 
         assertTrue(exception instanceof WeatherDataRetrievalException);
@@ -154,7 +155,7 @@ public class WeatherServiceTest {
             .thenReturn(Optional.empty());
 
         Exception exception = assertThrows(WeatherDataRetrievalException.class, () -> {
-            weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+            weatherService.getWeatherDataByCoordinate("103.150.26.242", DummyData.getCoordinate());
         });
 
         assertTrue(exception instanceof WeatherDataRetrievalException);
@@ -168,14 +169,14 @@ public class WeatherServiceTest {
 
         onAnswerOnFailure();
 
-        WeatherData weatherData = getWeatherData();
-        Geography geography = getGeography(weatherData);
+        WeatherData weatherData = DummyData.getWeatherData();
+        Geography geography = DummyData.getGeography(weatherData);
         weatherData.setGeography(geography);
 
         when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
             .thenReturn(Optional.of(geography));
 
-        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", DummyData.getCoordinate());
 
         assertNotNull(simplifiedWeatherData, "The simplifiedWeatherData should not be null");
         assertEquals(simplifiedWeatherData.getVisibility(), 4000);
@@ -201,37 +202,6 @@ public class WeatherServiceTest {
             callback.onFailure(call, new IOException());
             return null;
         }).when(call).enqueue(any(Callback.class));
-    }
-
-
-    public Geography getGeography(WeatherData weatherData) {
-        return Geography.builder()
-            .country("BD")
-            .city("Dhaka")
-            .latitude(23.7)
-            .longitude(90.4)
-            .ipAddress("103.150.26.242")
-            .queryTimestamp(new Date())
-            .weatherData(weatherData)
-            .build();
-    }
-
-    public WeatherData getWeatherData() {
-        return WeatherData.builder()
-            .currentTemperature(304.18)
-            .feelsLike(306.02)
-            .minTemperature(304.18)
-            .maxTemperature(304.18)
-            .pressure(1006)
-            .humidity(51)
-            .visibility(4000)
-            .windSpeed(3.09)
-            .queryTimestamp(new Date())
-            .build();
-    }
-
-    public Coordinate getCoordinate() {
-        return Coordinate.builder().latitude(23.7).longitude(90.4).build();
     }
 
     public static String readFileAsString(String filePath) throws IOException {
