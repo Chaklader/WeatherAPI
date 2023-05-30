@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.equalTo;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-class WeatherControllerMockedTest {
+public class WeatherControllerMockedTest {
 
     @Autowired
     private MockMvc mockMvc;

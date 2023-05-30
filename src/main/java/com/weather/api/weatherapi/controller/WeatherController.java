@@ -21,13 +21,12 @@ import java.util.List;
 @RequestMapping(path = "/v1/api")
 public class WeatherController {
 
+
     private final WeatherService weatherService;
 
     private final LocationService locationService;
 
     /*
-        1. TODO: Write unit and integration tests for the app (coverage: 80%)
-        2. TODO: Add the postman collection with the project
         3. TODO: write a proper README file - write main API description that IP address needs to be provided
             using the headers + Open API webpage
     * */

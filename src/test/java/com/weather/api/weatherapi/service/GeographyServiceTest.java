@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class GeographyServiceTest {
+public class GeographyServiceTest {
 
 
     @Mock

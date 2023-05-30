@@ -52,7 +52,7 @@ public class GeographicalWeatherDataUtils {
 
     private static double kelvinToCelsius(double temperatureInKelvin) {
         double temperatureInCelsius = temperatureInKelvin - 273.15;
-        return Math.round(temperatureInCelsius * 100.0) / 100.0;
+        return MathUtils.getDoubleWithTwoDecimalPoints(temperatureInCelsius);
     }
 
 }
