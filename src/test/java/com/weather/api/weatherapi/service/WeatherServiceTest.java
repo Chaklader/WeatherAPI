@@ -8,6 +8,8 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
+import com.weather.api.weatherapi.service.exception.WeatherDataRetrievalException;
+import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,9 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 @ExtendWith(MockitoExtension.class)
 public class WeatherServiceTest {
 
+    public static final String MOCK_WEATHER_DATA_FILE = "src/test/resources/mock/mock_weather_data.json";
+
+
     @Mock
     private OkHttpClient client;
     @Mock
@@ -48,9 +53,6 @@ public class WeatherServiceTest {
     Response response;
     @Mock
     ResponseBody responseBody;
-
-    public static final String MOCK_WEATHER_DATA_FILE = "src/test/resources/mock/mock_weather_data.json";
-
 
 
 
@@ -125,6 +127,29 @@ public class WeatherServiceTest {
         assertEquals(simplifiedWeatherData.getFeelsLike(), 32.87);
         assertEquals(simplifiedWeatherData.getWindSpeed(), 3.09);
     }
+
+
+
+    @Test
+    void test_GetWeatherDataByCoordinate_WithApiFailure_AndNoDbDataFailure() {
+        when(response.isSuccessful()).thenReturn(false);
+
+        when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
+            .thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(WeatherDataRetrievalException.class, () -> {
+            weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+        });
+
+        assertTrue(exception instanceof WeatherDataRetrievalException);
+        assertEquals(((WeatherDataRetrievalException) exception).getUserFriendlyMessage(), Parameters.USER_FRIENDLY_MESSAGE);
+        assertEquals(((WeatherDataRetrievalException) exception).getDetailedTechnicalDescription(), Parameters.DETAILED_TECHNICAL_DESCRIPTION);
+    }
+
+
+
+
+
 
     public Geography getGeography(WeatherData weatherData) {
         return Geography.builder()

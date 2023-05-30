@@ -44,7 +44,6 @@ public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final GeographyRepository geographyRepository;
 
-//    @Autowired
     private OkHttpClient client;
 
     @Autowired
@@ -96,20 +95,20 @@ public class WeatherService {
             SimplifiedWeatherData simplifiedWeatherData = GeographicalWeatherDataUtils.convertToSimplifiedWeatherData(weatherData);
             future.complete(simplifiedWeatherData);
         } else {
-            checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
             log.warn("Request to the weather API was not successful with status code: " + response.code() + " and we are retrieving data from the database");
+            checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
         }
     }
 
     private void handleOnFailure(@NotNull IOException e, CompletableFuture<SimplifiedWeatherData> future, String ipAddress, Coordinate coordinate) {
-        checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
         log.error("Request to the weather API was not successful with error message: " + e.getMessage() + " and we are retrieving data from the database");
+        checkIfWeatherDataCanBeRetrieveFromDatabase(ipAddress, coordinate, future);
     }
 
     private void checkIfWeatherDataCanBeRetrieveFromDatabase(String ipAddress, Coordinate coordinate, CompletableFuture<SimplifiedWeatherData> future) {
         retrieveWeatherDataFromDatabase(ipAddress, coordinate, future);
         if (!future.isDone()) {
-            future.completeExceptionally(new WeatherDataRetrievalException(Parameters.USER_FRIENDLY_MESSAGE, Parameters.DETAILED_TECHNICAL_DESCRIPTION));
+            throw new WeatherDataRetrievalException(Parameters.USER_FRIENDLY_MESSAGE, Parameters.DETAILED_TECHNICAL_DESCRIPTION);
         }
     }
 
