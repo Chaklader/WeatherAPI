@@ -71,11 +71,7 @@ public class WeatherServiceTest {
     @Test
     void test_getWeatherDataByCoordinate_withApiSuccessful() throws IOException {
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onResponse(call, response);
-            return null;
-        }).when(call).enqueue(any(Callback.class));
+        doAnswerOnResponse();
 
         when(response.isSuccessful()).thenReturn(true);
         when(response.body()).thenReturn(responseBody);
@@ -107,11 +103,7 @@ public class WeatherServiceTest {
     @Test
     void test_GetWeatherDataByCoordinate_WithApiFailure_AndDbData() {
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onResponse(call, response);
-            return null;
-        }).when(call).enqueue(any(Callback.class));
+        doAnswerOnResponse();
 
         when(response.isSuccessful()).thenReturn(false);
 
@@ -133,16 +125,10 @@ public class WeatherServiceTest {
         assertEquals(simplifiedWeatherData.getWindSpeed(), 3.09);
     }
 
-
-
     @Test
     void test_GetWeatherDataByCoordinate_WithApiFailure_AndNoDbDataFailure() {
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onResponse(call, response);
-            return null;
-        }).when(call).enqueue(any(Callback.class));
+        doAnswerOnResponse();
 
         when(response.isSuccessful()).thenReturn(false);
 
@@ -162,11 +148,7 @@ public class WeatherServiceTest {
     @Test
     void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataFailure() {
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onFailure(call, new IOException());
-            return null;
-        }).when(call).enqueue(any(Callback.class));
+        onAnswerOnFailure();
 
         when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
             .thenReturn(Optional.empty());
@@ -184,11 +166,7 @@ public class WeatherServiceTest {
     @Test
     void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataSuccessful() {
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onFailure(call, new IOException());
-            return null;
-        }).when(call).enqueue(any(Callback.class));
+        onAnswerOnFailure();
 
         WeatherData weatherData = getWeatherData();
         Geography geography = getGeography(weatherData);
@@ -209,8 +187,21 @@ public class WeatherServiceTest {
     }
 
 
+    private void doAnswerOnResponse() {
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onResponse(call, response);
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+    }
 
-
+    private void onAnswerOnFailure() {
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onFailure(call, new IOException());
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+    }
 
 
     public Geography getGeography(WeatherData weatherData) {
