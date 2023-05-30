@@ -1,4 +1,4 @@
-package com.weather.api.weatherapi.service.client;
+package com.weather.api.weatherapi.configuration.client;
 
 import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.Interceptor;

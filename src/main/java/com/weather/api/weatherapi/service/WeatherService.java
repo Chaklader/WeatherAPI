@@ -7,11 +7,9 @@ import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
-import com.weather.api.weatherapi.service.client.OkHttpClientSingleton;
 import com.weather.api.weatherapi.service.exception.WeatherDataRetrievalException;
 import com.weather.api.weatherapi.utils.GeographicalWeatherDataUtils;
 import com.weather.api.weatherapi.utils.Parameters;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.*;
@@ -20,7 +18,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -48,12 +45,8 @@ public class WeatherService {
     private final GeographyRepository geographyRepository;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private OkHttpClient client;
 
-    @PostConstruct
-    public void init() {
-        OkHttpClientSingleton.INSTANCE.initialize(applicationContext);
-    }
 
     @Cacheable(value = "weatherCache", keyGenerator = Parameters.KEY_GENERATOR)
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
@@ -62,7 +55,6 @@ public class WeatherService {
 
         CompletableFuture<SimplifiedWeatherData> future = new CompletableFuture<>();
 
-        OkHttpClient client = OkHttpClientSingleton.INSTANCE.getClient();
         Request request = new Request.Builder().url(OPEN_WEATHER_MAP_QUERY_URL).build();
 
         client.newCall(request).enqueue(new Callback() {

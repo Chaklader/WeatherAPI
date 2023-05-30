@@ -1,4 +1,4 @@
-package com.weather.api.weatherapi.service.client;
+package com.weather.api.weatherapi.configuration.client;
 
 import lombok.extern.log4j.Log4j2;
 import okhttp3.Call;
