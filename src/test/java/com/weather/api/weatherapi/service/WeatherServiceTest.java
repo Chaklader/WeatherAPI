@@ -65,16 +65,17 @@ public class WeatherServiceTest {
         setField(weatherService, "OPEN_WEATHER_MAP_API_BASE_URL", "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s");
 
         when(client.newCall(any(Request.class))).thenReturn(call);
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgument(0);
-            callback.onResponse(call, response);
-            return null;
-        }).when(call).enqueue(any(Callback.class));
     }
 
 
     @Test
     void test_getWeatherDataByCoordinate_withApiSuccessful() throws IOException {
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onResponse(call, response);
+            return null;
+        }).when(call).enqueue(any(Callback.class));
 
         when(response.isSuccessful()).thenReturn(true);
         when(response.body()).thenReturn(responseBody);
@@ -106,18 +107,22 @@ public class WeatherServiceTest {
     @Test
     void test_GetWeatherDataByCoordinate_WithApiFailure_AndDbData() {
 
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onResponse(call, response);
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+
         when(response.isSuccessful()).thenReturn(false);
 
         WeatherData weatherData = getWeatherData();
         Geography geography = getGeography(weatherData);
         weatherData.setGeography(geography);
 
-        Coordinate coordinate = getCoordinate();
-
         when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
             .thenReturn(Optional.of(geography));
 
-        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", coordinate);
+        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
 
         assertNotNull(simplifiedWeatherData, "The simplifiedWeatherData should not be null");
         assertEquals(simplifiedWeatherData.getVisibility(), 4000);
@@ -132,6 +137,13 @@ public class WeatherServiceTest {
 
     @Test
     void test_GetWeatherDataByCoordinate_WithApiFailure_AndNoDbDataFailure() {
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onResponse(call, response);
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+
         when(response.isSuccessful()).thenReturn(false);
 
         when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
@@ -144,6 +156,56 @@ public class WeatherServiceTest {
         assertTrue(exception instanceof WeatherDataRetrievalException);
         assertEquals(((WeatherDataRetrievalException) exception).getUserFriendlyMessage(), Parameters.USER_FRIENDLY_MESSAGE);
         assertEquals(((WeatherDataRetrievalException) exception).getDetailedTechnicalDescription(), Parameters.DETAILED_TECHNICAL_DESCRIPTION);
+    }
+
+
+    @Test
+    void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataFailure() {
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onFailure(call, new IOException());
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+
+        when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
+            .thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(WeatherDataRetrievalException.class, () -> {
+            weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+        });
+
+        assertTrue(exception instanceof WeatherDataRetrievalException);
+        assertEquals(((WeatherDataRetrievalException) exception).getUserFriendlyMessage(), Parameters.USER_FRIENDLY_MESSAGE);
+        assertEquals(((WeatherDataRetrievalException) exception).getDetailedTechnicalDescription(), Parameters.DETAILED_TECHNICAL_DESCRIPTION);
+    }
+
+
+    @Test
+    void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataSuccessful() {
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgument(0);
+            callback.onFailure(call, new IOException());
+            return null;
+        }).when(call).enqueue(any(Callback.class));
+
+        WeatherData weatherData = getWeatherData();
+        Geography geography = getGeography(weatherData);
+        weatherData.setGeography(geography);
+
+        when(geographyRepository.findFirstByIpAddressOrLatitudeAndLongitudeOrderByQueryTimestampDesc(anyString(), anyDouble(), anyDouble()))
+            .thenReturn(Optional.of(geography));
+
+        SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate("103.150.26.242", getCoordinate());
+
+        assertNotNull(simplifiedWeatherData, "The simplifiedWeatherData should not be null");
+        assertEquals(simplifiedWeatherData.getVisibility(), 4000);
+        assertEquals(simplifiedWeatherData.getTemperature(), 31.03);
+        assertEquals(simplifiedWeatherData.getHumidity(), 51);
+        assertEquals(simplifiedWeatherData.getPressure(), 1006);
+        assertEquals(simplifiedWeatherData.getFeelsLike(), 32.87);
+        assertEquals(simplifiedWeatherData.getWindSpeed(), 3.09);
     }
 
 
