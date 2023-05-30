@@ -3,6 +3,7 @@ package com.weather.api.weatherapi.controller;
 import com.weather.api.weatherapi.controller.dto.Coordinate;
 import com.weather.api.weatherapi.controller.dto.SimplifiedWeatherData;
 import com.weather.api.weatherapi.controller.dto.WeatherDataDto;
+import com.weather.api.weatherapi.dummy.DummyData;
 import com.weather.api.weatherapi.service.LocationService;
 import com.weather.api.weatherapi.service.WeatherService;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -67,18 +67,7 @@ class WeatherControllerMockedTest {
     @Test
     public void test_getHistoricalWeatherByCoordinates() throws Exception {
 
-        WeatherDataDto weatherDataDto = WeatherDataDto.builder()
-            .currentTemperature(304.18)
-            .minTemperature(304.18)
-            .maxTemperature(304.18)
-            .feelsLike(306.02)
-            .humidity(51)
-            .pressure(1006)
-            .visibility(4000)
-            .windSpeed(3.09)
-            .queryTimestamp(new Date())
-            .ipAddress("103.150.26.242")
-            .build();
+        WeatherDataDto weatherDataDto = DummyData.getWeatherDataDto();
 
         List<WeatherDataDto> weatherDataDtosList = List.of(weatherDataDto);
 
@@ -100,6 +89,5 @@ class WeatherControllerMockedTest {
             .andExpect(jsonPath("$[0].queryTimestamp").exists())
             .andExpect(jsonPath("$[0].ipAddress").value("103.150.26.242"));
     }
-
 
 }

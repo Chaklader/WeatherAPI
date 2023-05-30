@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.weather.api.weatherapi.controller.dto.SimplifiedWeatherData;
 import com.weather.api.weatherapi.controller.dto.Coordinate;
+import com.weather.api.weatherapi.controller.dto.WeatherDataDto;
 import com.weather.api.weatherapi.dao.model.Geography;
 import com.weather.api.weatherapi.dao.model.WeatherData;
 import com.weather.api.weatherapi.dao.repository.GeographyRepository;
 import com.weather.api.weatherapi.dao.repository.WeatherRepository;
 import com.weather.api.weatherapi.dummy.DummyData;
 import com.weather.api.weatherapi.service.exception.WeatherDataRetrievalException;
+import com.weather.api.weatherapi.utils.FileUtils;
 import com.weather.api.weatherapi.utils.Parameters;
 import okhttp3.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,20 +21,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class WeatherServiceTest {
 
     public static final String MOCK_WEATHER_DATA_FILE = "src/test/resources/mock/mock_weather_data.json";
@@ -56,7 +59,6 @@ public class WeatherServiceTest {
     ResponseBody responseBody;
 
 
-
     @BeforeEach
     void setup() {
 
@@ -70,14 +72,14 @@ public class WeatherServiceTest {
 
 
     @Test
-    void test_getWeatherDataByCoordinate_withApiSuccessful() throws IOException {
+    public void test_getWeatherDataByCoordinate_withApiSuccessful() throws IOException {
 
         doAnswerOnResponse();
 
         when(response.isSuccessful()).thenReturn(true);
         when(response.body()).thenReturn(responseBody);
 
-        when(responseBody.string()).thenReturn(readFileAsString(MOCK_WEATHER_DATA_FILE));
+        when(responseBody.string()).thenReturn(FileUtils.readFileAsString(MOCK_WEATHER_DATA_FILE));
 
         WeatherData weatherData = DummyData.getWeatherData();
         Geography geography = DummyData.getGeography(weatherData);
@@ -102,7 +104,7 @@ public class WeatherServiceTest {
 
 
     @Test
-    void test_GetWeatherDataByCoordinate_WithApiFailure_AndDbData() {
+    public void test_GetWeatherDataByCoordinate_WithApiFailure_AndDbData() {
 
         doAnswerOnResponse();
 
@@ -127,7 +129,7 @@ public class WeatherServiceTest {
     }
 
     @Test
-    void test_GetWeatherDataByCoordinate_WithApiFailure_AndNoDbDataFailure() {
+    public void test_GetWeatherDataByCoordinate_WithApiFailure_AndNoDbDataFailure() {
 
         doAnswerOnResponse();
 
@@ -147,7 +149,7 @@ public class WeatherServiceTest {
 
 
     @Test
-    void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataFailure() {
+    public void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataFailure() {
 
         onAnswerOnFailure();
 
@@ -165,7 +167,7 @@ public class WeatherServiceTest {
 
 
     @Test
-    void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataSuccessful() {
+    public void test_GetWeatherDataByCoordinate_OkHttpClientOnFailure_WithApiFailure_AndNoDbDataSuccessful() {
 
         onAnswerOnFailure();
 
@@ -187,6 +189,37 @@ public class WeatherServiceTest {
         assertEquals(simplifiedWeatherData.getWindSpeed(), 3.09);
     }
 
+    @Test
+    public void test_getHistoricalWeatherByCoordinates(){
+
+        WeatherData weatherData = DummyData.getWeatherData();
+        Geography geography = DummyData.getGeography(weatherData);
+        weatherData.setGeography(geography);
+
+        List<WeatherData> weatherDataList = List.of(weatherData);
+
+        when(weatherRepository.findAllByGeography_LatitudeAndGeography_Longitude(anyDouble(), anyDouble()))
+            .thenReturn(weatherDataList);
+
+        List<WeatherDataDto> historicalWeatherData = weatherService.getHistoricalWeatherByCoordinates(23.7, 90.4);
+
+        assertNotNull(historicalWeatherData);
+        assertEquals(1, historicalWeatherData.size());
+
+        WeatherDataDto weatherDataDto = historicalWeatherData.get(0);
+
+        assertEquals(weatherData.getCurrentTemperature(), weatherDataDto.getCurrentTemperature());
+        assertEquals(weatherData.getMinTemperature(), weatherDataDto.getMinTemperature());
+        assertEquals(weatherData.getMaxTemperature(), weatherDataDto.getMaxTemperature());
+        assertEquals(weatherData.getFeelsLike(), weatherDataDto.getFeelsLike());
+        assertEquals(weatherData.getHumidity(), weatherDataDto.getHumidity());
+        assertEquals(weatherData.getPressure(), weatherDataDto.getPressure());
+        assertEquals(weatherData.getVisibility(), weatherDataDto.getVisibility());
+        assertEquals(weatherData.getWindSpeed(), weatherDataDto.getWindSpeed());
+        assertEquals(weatherData.getQueryTimestamp(), weatherDataDto.getQueryTimestamp());
+        assertEquals(geography.getIpAddress(), weatherDataDto.getIpAddress());
+
+    }
 
     private void doAnswerOnResponse() {
         doAnswer(invocation -> {
@@ -202,11 +235,5 @@ public class WeatherServiceTest {
             callback.onFailure(call, new IOException());
             return null;
         }).when(call).enqueue(any(Callback.class));
-    }
-
-    public static String readFileAsString(String filePath) throws IOException {
-        Path path = Path.of(filePath);
-        byte[] bytes = Files.readAllBytes(path);
-        return new String(bytes);
     }
 }
