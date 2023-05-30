@@ -44,9 +44,13 @@ public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final GeographyRepository geographyRepository;
 
-    @Autowired
+//    @Autowired
     private OkHttpClient client;
 
+    @Autowired
+    public void setClient(OkHttpClient client) {
+        this.client = client;
+    }
 
     @Cacheable(value = "weatherCache", keyGenerator = Parameters.KEY_GENERATOR)
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {

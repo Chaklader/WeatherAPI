@@ -41,20 +41,6 @@ public class OkHttpClientConfig {
             .followRedirects(false)
             .readTimeout(1, TimeUnit.SECONDS)
             .build();
-
-
-        /*
-        OkHttpClientConfig config = applicationContext.getBean(OkHttpClientConfig.class);
-        Cache cache = new Cache(new File(config.getCacheDirectory()), config.getCacheSize());
-
-        client = new OkHttpClient.Builder()
-            .addInterceptor(new DefaultContentTypeInterceptor(Parameters.CONTENT_TYPE))
-            .cache(cache)
-            .eventListener(new WeatherLogEventsListener())
-            .followRedirects(false)
-            .readTimeout(1, TimeUnit.SECONDS)
-            .build();
-        * */
     }
 
 }

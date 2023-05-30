@@ -1,8 +1,8 @@
 {
     "visibility": 4000,
     "temperature": 31.03,
-    "humidity": 55,
-    "pressure": 1007,
+    "humidity": 51,
+    "pressure": 1006,
     "feelsLike": 33.72,
     "windSpeed": 3.09
 }
