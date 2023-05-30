@@ -31,8 +31,8 @@ public class GeographicalWeatherDataUtils {
         return Geography.builder()
             .country(jsonResponse.getJSONObject("sys").getString("country"))
             .city(jsonResponse.getString("name"))
-            .latitude(coord.getDouble("lat"))
-            .longitude(coord.getDouble("lon"))
+            .latitude(MathUtils.getDoubleWithTwoDecimalPoints(coord.getDouble("lat")))
+            .longitude(MathUtils.getDoubleWithTwoDecimalPoints(coord.getDouble("lon")))
             .weatherData(weatherData)
             .queryTimestamp(new Date())
             .build();

@@ -1,43 +1,74 @@
-Java developer home assignment
+# Project Description
 
-Your task is to develop a simple RESTful web service that would satisfy a set of functional requirements, as well as a 
-list of non-functional requirements. Please note, those non-functional requirements are given in order of importance; 
-items appearing earlier in the list are more crucial for assignment. The implementation of this task will be considered 
-representative of you at your best.
+Implement a web service that would handle GET requests to path “weather” by returning the weather data determined by IP
+of the request originator. Upon receiving a request, the service should perform a geolocation search using a
+non-commercial, 3rd party IP to location provider. Having performed the reverse geo search service should use another
+non-commercial, 3rd party service to determine current weather conditions using the coordinates of the IP.
 
-#Functional requirements
+## Clone the repository
 
-Implement a web service that would handle GET requests to path “weather” by returning the weather data determined by IP 
-of the request originator. Upon receiving a request, the service should perform a geolocation search using a non-commercial, 
-3rd party IP to location provider. Having performed the reverse geo search service should use another non-commercial, 3rd 
-party service to determine current weather conditions using the coordinates of the IP.
-
-#Non-functional requirements
-
-As mentioned previously, the following list is given in order of priority, you may implement only part 
-of the items (more is better, however).
-
-   1. Test coverage should be not less than 80%
-   2. Implemented web service should be resilient to 3rd party service unavailability
-   3. Data from 3rd party providers should be stored in a database
-   4. An in-memory cache should be used as the first layer in data retrieval
-   5. DB schema should allow a historical analysis of both queries from a specific IP and of weather
-      conditions for specific coordinates
-   6. DB schema versioning should be implemented
-      Result submission
-      Please provide a link to a Git repository containing your implementation.
-
-
-#To clone a project that uses Git LFS and includes large files, follow these steps:
-
-1. Clone the repository:
-2. Run the following command to install Git LFS using Homebrew (a popular package manager for macOS):
-   $ brew install git-lfs
+1. Clone the repository using the command ```git clone https://github.com/Chaklader/WeatherAPI.git```
+2. Enter inside the repo: ```cd WeatherAPI/```
+  <br> 
+  <br> 
+  As the IP address to location finder database is shipped with the repo, we need to install Git LFS to fetch it.
+  The installation instructions are provided below:
+   ###MacOS
+   Run the following command to install Git LFS using Homebrew (a popular package manager for macOS):
+  <br>
+  <br>
+       ```$ brew install git-lfs```
+   ### Windows
+   - Download the Git LFS installer for Windows from the official Git LFS website: https://git-lfs.github.com/
+   - Run the downloaded installer (.exe file).
+   - Follow the installation wizard prompts to complete the installation process.
+   ### Linux
+   Run the following command to install Git LFS:
+   <br>
+   <br>
+       ```$ sudo apt update && sudo apt install git-lfs```
+       <br>
+       <br>
 3. Initialize Git LFS in the cloned repository:
    $ git lfs install
 
 4. Fetch the Git LFS objects:
-   $ git lfs fetch
+   <br>
+   ```$ git lfs fetch```
 
 5. Run the following command to checkout the files with Git LFS:
-   $ git lfs checkout
+   <br>
+   ```$ git lfs checkout```
+
+The above procedure will make sure you have checkout the database ```src/main/resources/GeoLite2-City.mmdb``` correctly
+in the local repository. 
+
+## Database
+
+Install PostgreSQL database locally and create a database named ```weatherdb``` there. Our tables will be in the schema
+named ```weather``` but will be created by Flyway database versioning SQL provided in the ```src/main/resources/db/migration/table```
+location. 
+
+# Run Project
+
+1. Firstly, go inside the project repo and install all the dependencies using the command ```$ mvn install -DskipTests```.
+Please, make sure you are using Java 17, for example I use ```java version 17.0.6-zulu```
+2. The project can be run from the terminal using the command ```$ mvn spring-boot:run```
+3. Otherwise, Run from a standard IDE such as IntelliJ. Make sure you are using Java 17 in the IDE
+
+#Query Data
+
+I have provided the Postman collection in the root of the project, first run the request ```GET Weather Data``` that will
+fetch the weather data for the IP address and store in the database. Then, we can run other queries for historical analysis.
+See that I provided the IP address as header as the request can come from load balancer or proxy and may not indicate the
+actual IP address for the client. 
+
+#Test Suite
+
+Run the suite ```WeatherApiTestSuite.java``` and it will run all the tests for the project. 
+
+<br>
+<br>
+<br>
+
+

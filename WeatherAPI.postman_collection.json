@@ -18,13 +18,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/v1/api/weather",
+					"raw": "http://localhost:8080/mintos/v1/api/weather",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
+						"mintos",
 						"v1",
 						"api",
 						"weather"
@@ -45,16 +46,19 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/v1/api/weather",
+					"raw": "http://localhost:8080/mintos/v1/api/queries/ip/103.150.26.242",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
+						"mintos",
 						"v1",
 						"api",
-						"weather"
+						"queries",
+						"ip",
+						"103.150.26.242"
 					]
 				}
 			},
@@ -72,13 +76,14 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:8080/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
+					"raw": "http://localhost:8080/mintos/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
+						"mintos",
 						"v1",
 						"api",
 						"weather",

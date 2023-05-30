@@ -66,7 +66,7 @@ public class WeatherControllerITTest {
     }
 
     @Test
-    public void testGetHistoricalWeatherByCoordinates() {
+    public void test_GetHistoricalWeatherByCoordinates() {
 
         WeatherData weatherData = DummyData.getWeatherData();
         Geography geography = DummyData.getGeography(weatherData);
@@ -75,9 +75,15 @@ public class WeatherControllerITTest {
         weatherRepository.save(weatherData);
         geographyRepository.save(geography);
 
-        ResponseEntity<WeatherDataDto[]> responseEntity = restTemplate.getForEntity(
-                "http://localhost:" + port + "/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
-                WeatherDataDto[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<WeatherDataDto[]> responseEntity = restTemplate.exchange(
+            "http://localhost:" + port + "/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            WeatherDataDto[].class);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 

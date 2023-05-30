@@ -26,10 +26,7 @@ public class WeatherController {
 
     private final LocationService locationService;
 
-    /*
-        3. TODO: write a proper README file - write main API description that IP address needs to be provided
-            using the headers + Open API webpage
-    * */
+
     @GetMapping("/weather")
     public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception{
 
