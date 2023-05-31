@@ -61,8 +61,8 @@ location.
 
 I have provided the Postman collection in the root of the project, first run the request `GET Weather Data` that will
 fetch the weather data for the IP address and store in the database. Then, we can run other queries for historical analysis.
-See that I provided the IP address as header as the request can come from load balancer or proxy and may not indicate the
-actual IP address for the client.
+See that I provided the IP address using ```X-Forwarded-For``` header as the request can come from load balancer or proxy 
+and may not indicate the actual IP address for the client.
 
 <br>
 <br>
