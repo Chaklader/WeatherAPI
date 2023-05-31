@@ -64,6 +64,14 @@ fetch the weather data for the IP address and store in the database. Then, we ca
 See that I provided the IP address as header as the request can come from load balancer or proxy and may not indicate the
 actual IP address for the client.
 
+<br>
+<br>
+
+![Postman collection](images/postman.png )
+
+<br>
+<br>
+
 ## Test Suite
 
 Run the suite `WeatherApiTestSuite.java` and it will run all the tests for the project.
