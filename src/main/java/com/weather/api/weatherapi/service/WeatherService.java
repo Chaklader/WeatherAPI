@@ -51,6 +51,14 @@ public class WeatherService {
         this.client = client;
     }
 
+
+    /*
+     * We make the request to find the weather condition resilient using Redis cache with 10 minutes of expiry time.
+     * Also, we use OkHttpClient for requesting data from the Open Weather Map that supports local cache of 10 MB size and would
+     * ensure providing the weather data with low latency. If the data is not found in the cache, we can also provide from the
+     * database for the same location (latitude and longitude) when the external API calls fail.
+     * The cache expiration time duration and size of local cache is configuration from the properties file
+     * */
     @Cacheable(value = "weatherCache", keyGenerator = Parameters.KEY_GENERATOR)
     public SimplifiedWeatherData getWeatherDataByCoordinate(String ipAddress, Coordinate coordinate) {
 

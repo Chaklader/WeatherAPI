@@ -27,13 +27,19 @@ public class WeatherController {
     private final LocationService locationService;
 
 
+    /*
+     * The IP address retrieve from the request can be misleading as the request can come from a proxy or load balancer
+     * so the best way to acquire client IP address is using header. Please, provide the IP address using
+     * "X-Forwarded-For" header (we also support a few other headers as well) and our server will interpret that
+     * accordingly.
+     * */
     @GetMapping("/weather")
-    public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception{
+    public ResponseEntity<SimplifiedWeatherData> getWeather() throws IOException, GeoIp2Exception {
 
         Pair<String, Coordinate> ipAddressCoordinatePair = locationService.retrieveCoordinateFromIpAddress();
         SimplifiedWeatherData simplifiedWeatherData = weatherService.getWeatherDataByCoordinate(ipAddressCoordinatePair.getLeft(), ipAddressCoordinatePair.getRight());
 
-        log.info("We are successfully acquired the weather data for the IP address: "+ ipAddressCoordinatePair.getLeft());
+        log.info("We are successfully acquired the weather data for the IP address: " + ipAddressCoordinatePair.getLeft());
         return ResponseEntity.ok(simplifiedWeatherData);
     }
 

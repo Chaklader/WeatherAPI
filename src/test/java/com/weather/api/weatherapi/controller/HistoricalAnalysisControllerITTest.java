@@ -17,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -45,7 +43,8 @@ public class HistoricalAnalysisControllerITTest {
     @LocalServerPort
     private int port;
 
-    private final TestRestTemplate restTemplate = new TestRestTemplate();
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     @Autowired
     private GeographyRepository geographyRepository;
@@ -55,12 +54,8 @@ public class HistoricalAnalysisControllerITTest {
 
     @BeforeEach
     public void setUp() {
-        restTemplate.getRestTemplate().setInterceptors(Collections.singletonList(new BasicAuthenticationInterceptor("test", "test")));
-        restTemplate.getRestTemplate().getInterceptors().add((request, body, execution) -> {
-            ClientHttpResponse response = execution.execute(request, body);
-            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            return response;
-        });
+        geographyRepository.deleteAll();
+        weatherRepository.deleteAll();
     }
 
     @AfterEach
