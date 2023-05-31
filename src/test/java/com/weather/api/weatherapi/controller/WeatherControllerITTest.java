@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -53,10 +54,12 @@ public class WeatherControllerITTest {
 
     @BeforeEach
     public void setUp() {
-        geographyRepository.deleteAll();
-        weatherRepository.deleteAll();
-
         restTemplate.getRestTemplate().setInterceptors(Collections.singletonList(new BasicAuthenticationInterceptor("test", "test")));
+        restTemplate.getRestTemplate().getInterceptors().add((request, body, execution) -> {
+            ClientHttpResponse response = execution.execute(request,body);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return response;
+        });
     }
 
     @AfterEach
@@ -80,7 +83,7 @@ public class WeatherControllerITTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ResponseEntity<WeatherDataDto[]> responseEntity = restTemplate.exchange(
-            "http://localhost:" + port + "/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
+            "http://localhost:" + port + "/mintos/v1/api/weather/coordinates?latitude=23.7&longitude=90.4",
             HttpMethod.GET,
             new HttpEntity<>(headers),
             WeatherDataDto[].class);
@@ -92,6 +95,7 @@ public class WeatherControllerITTest {
         assertEquals(1, weatherDataDtos.length);
 
         WeatherDataDto weatherDataDto = weatherDataDtos[0];
+
         assertEquals(weatherData.getCurrentTemperature(), weatherDataDto.getCurrentTemperature());
         assertEquals(weatherData.getMinTemperature(), weatherDataDto.getMinTemperature());
         assertEquals(weatherData.getMaxTemperature(), weatherDataDto.getMaxTemperature());
