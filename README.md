@@ -74,7 +74,8 @@ actual IP address for the client.
 
 ## Test Suite
 
-Run the suite `WeatherApiTestSuite.java` and it will run all the tests for the project.
+Run the suite `WeatherApiTestSuite.java` and it will run all the tests for the project. You can also run the command
+```mvn clean install``` that will run all the tests for the project
 
 <br>
 <br>
