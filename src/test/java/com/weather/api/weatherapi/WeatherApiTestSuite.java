@@ -1,5 +1,6 @@
 package com.weather.api.weatherapi;
 
+import com.weather.api.weatherapi.controller.HistoricalAnalysisControllerITTest;
 import com.weather.api.weatherapi.controller.WeatherControllerITTest;
 import com.weather.api.weatherapi.controller.WeatherControllerMockedTest;
 import com.weather.api.weatherapi.service.GeographyServiceTest;
@@ -17,11 +18,11 @@ import org.junit.runner.RunWith;
     GeographyServiceTest.class,
     LocationServiceTest.class,
     WeatherServiceTest.class,
-    WeatherControllerITTest.class
+    WeatherControllerITTest.class,
+    HistoricalAnalysisControllerITTest.class
 })
 @Suite
 public class WeatherApiTestSuite {
-
 
 }
 
