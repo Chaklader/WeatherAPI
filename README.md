@@ -13,7 +13,8 @@ non-commercial, 3rd party service to determine current weather conditions using 
    <br>
    As the IP address to location finder database is shipped with the repo, we need to install Git LFS to fetch it.
    The installation instructions are provided below:
-   ###MacOS
+   <br>
+   ### MacOS
    Run the following command to install Git LFS using Homebrew (a popular package manager for macOS):
    <br>
    <br>
@@ -29,14 +30,14 @@ non-commercial, 3rd party service to determine current weather conditions using 
    `$ sudo apt update && sudo apt install git-lfs`
    <br>
    <br>
-3. Initialize Git LFS in the cloned repository:
+4. Initialize Git LFS in the cloned repository:
    $ git lfs install
 
-4. Fetch the Git LFS objects:
+5. Fetch the Git LFS objects:
    <br>
    `$ git lfs fetch`
 
-5. Run the following command to checkout the files with Git LFS:
+6. Run the following command to checkout the files with Git LFS:
    <br>
    `$ git lfs checkout`
 
