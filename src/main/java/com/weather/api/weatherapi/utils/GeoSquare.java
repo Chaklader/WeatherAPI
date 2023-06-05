@@ -1,22 +1,51 @@
 package com.weather.api.weatherapi.utils;
 
 import com.weather.api.weatherapi.controller.dto.Coordinate;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/*
-Creating a program to map the Earth into 10 mile by 10 mile squares involves dealing with complex geographic calculations. Keep in mind that Earth is not a perfect sphere, but an oblate spheroid. This means that calculations involving latitude and longitude can become quite complex and might not result in perfect squares due to the Earth's curvature.
+import static com.weather.api.weatherapi.utils.Parameters.MILES_PER_DEGREE;
+import static com.weather.api.weatherapi.utils.Parameters.SQUARE_SIZE;
 
-However, for a simplified representation, we can ignore Earth's curvature and treat it as a planar surface, considering that one degree of latitude is approximately 69 miles, and one degree of longitude is approximately 69 miles at the equator but decreases as we move towards the poles.
+/*
+Earth is not a perfect sphere, but an oblate spheroid. This means that calculations involving latitude and longitude can
+become quite complex and might not result in perfect squares due to the Earth's curvature.
+
+For a simplified representation, we can ignore Earth's curvature and treat it as a planar surface, considering that 1 degree
+of latitude is approximately 69 miles, and one degree of longitude is approximately 69 miles at the equator but decreases as
+we move towards the poles.
 
 * */
+
+@Order(1)
+@Component
+@Slf4j
 public class GeoSquare {
 
 
-    public static final double MILES_PER_DEGREE = 69.0;
-    public static final double SQUARE_SIZE = 10.0;
+    @Autowired
+    private TaskExecutor taskExecutor;
+
+
+    @Async("taskExecutor")
+    @PostConstruct
+    public void init() {
+        taskExecutor.execute(() -> {
+            final List<Coordinate> coordinates = calculateSquareCenters();
+            log.info("THE NUMBER OF SQUARES ARE : " + coordinates.size());
+        });
+    }
+
+
 
     public static List<Coordinate> calculateSquareCenters() {
         List<Double> latitudes = IntStream.rangeClosed(-90, 90)

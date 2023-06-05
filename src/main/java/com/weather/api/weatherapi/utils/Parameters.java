@@ -29,4 +29,8 @@ public class Parameters {
         "HTTP_VIA",
         "REMOTE_ADDR"
     };
+
+
+    public static final double MILES_PER_DEGREE = 69.0;
+    public static final double SQUARE_SIZE = 10.0;
 }
